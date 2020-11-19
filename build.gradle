@@ -1,0 +1,112 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+    }
+}
+
+plugins {
+    id 'java-library'
+    id "com.jfrog.bintray" version "1.8.4"
+    id 'maven-publish'
+    id 'maven'
+    id 'nebula.release' version '13.0.0'
+}
+
+group = 'com.github.bijukunjummen'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+ext {
+    jacksonBom = "2.9.10.20191020"
+    junitVersion = "5.3.2"
+    assertJVersion = "3.16.1"
+    testContainersVersion = "1.15.0"
+    jsonAssertVersion = "1.5.0"
+}
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonBom}")
+    implementation enforcedPlatform("software.amazon.awssdk:bom:2.15.25")
+    api("com.fasterxml.jackson.core:jackson-core")
+    api("com.fasterxml.jackson.core:jackson-databind")
+    api("software.amazon.awssdk:dynamodb")
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
+    testImplementation("org.testcontainers:localstack:${testContainersVersion}")
+    testImplementation("org.skyscreamer:jsonassert:${jsonAssertVersion}")
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+bintray {
+    user = bintray_user
+    key = bintray_api_key
+    configurations = ['archives']
+    pkg {
+        repo = 'repo'
+        name = project.name
+        group = project.group
+//        version = project.version
+        userOrg = user
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'aws-sdk2-dynamo-json-helper'
+            description 'Utility for converting a JSON to an attribute value and back'
+            url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+            inceptionYear '2020'
+
+            packaging 'jar'
+            groupId project.group
+            artifactId project.name
+            version project.version
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                connection 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+                url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+
+            }
+            developers {
+                developer {
+                    name 'Biju Kunjummen'
+                }
+            }
+        }
+    }
+}
