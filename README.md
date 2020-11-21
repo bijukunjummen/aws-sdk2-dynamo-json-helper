@@ -1,4 +1,4 @@
-# Jackson JsonNode to AWS SDK 2 AttributeValue and back..
+# Jackson JsonNode to AWS SDK 2 AttributeValue
 
 This is a small java library that provides a utility method to convert a [Jackson](https://github.com/FasterXML/jackson) JsonNode
 to an AWS SDK 2.x [AttributeValue](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/dynamodb/model/AttributeValue.html)

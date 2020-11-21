@@ -81,7 +81,7 @@ install {
     repositories.mavenInstaller {
         pom.project {
             name 'aws-sdk2-dynamo-json-helper'
-            description 'Utility for converting a JSON to an attribute value and back'
+            description 'Utility for converting a JSON to AWS SDK2 AttributeValue and back'
             url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
             inceptionYear '2020'
 

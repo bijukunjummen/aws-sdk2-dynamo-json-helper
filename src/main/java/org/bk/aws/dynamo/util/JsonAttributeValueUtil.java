@@ -1,6 +1,7 @@
 package org.bk.aws.dynamo.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.NumericNode;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -15,12 +17,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility to convert a Jackson {@link JsonNode} to a AWS SDK 2 {@link AttributeValue}
+ * and back
+ * <p>
+ * Uses: It is possible to store a raw string into DynamoDB but then all the advantages of a document store is lost
+ * Every processing on that data will have to be done in the application layer by de-serializing the raw string to a
+ * json.
+ * Storing the json as a nested AttributeValue provides a way for the data to become queryable, nested attributes can be
+ * queried, filtered and treated like any other attribute in dynamo.
+ */
 public final class JsonAttributeValueUtil {
 
     private JsonAttributeValueUtil() {
 
     }
 
+
+    /**
+     * Convert a {@link JsonNode} to an {@link AttributeValue}
+     *
+     * @param jsonNode json represented as a Jackson {@link JsonNode}
+     * @return attribute value.
+     * @throws IllegalStateException if a attribute type does not easily transform to an AttributeValue type
+     */
     public static AttributeValue toAttributeValue(JsonNode jsonNode) {
         if (jsonNode.isObject()) {
             return toAttributeValue((ObjectNode) jsonNode);
@@ -30,6 +50,56 @@ public final class JsonAttributeValueUtil {
             return toAttributeValue((ValueNode) jsonNode);
         }
         throw new IllegalStateException("Unexpected node type " + jsonNode.toString());
+    }
+
+    /**
+     * Convert a raw json to an {@link AttributeValue}
+     *
+     * @param json         raw json that is internally transformed to a {@link JsonNode}
+     * @param objectMapper Jackson {@link ObjectMapper} for converting the raw json to a {@link JsonNode}
+     * @return attribute value.
+     * @throws IllegalStateException if a attribute type does not easily transform to an AttributeValue type
+     */
+    public static AttributeValue toAttributeValue(String json, ObjectMapper objectMapper) {
+        return toAttributeValue(rawJsonToJsonNode(json, objectMapper));
+    }
+
+    /**
+     * Convert an  {@link AttributeValue} to a {@link JsonNode}
+     *
+     * @param attributeValue {@link AttributeValue}
+     * @return Json represented as a Jackson {@link JsonNode}
+     * @throws IllegalStateException if a json type does not map to an {@link AttributeValue}
+     */
+    public static JsonNode fromAttributeValue(AttributeValue attributeValue) {
+        if (attributeValue.hasM()) {
+            return fromAttributeValue(attributeValue.m());
+        } else if (attributeValue.hasL()) {
+            return fromAttributeValue(attributeValue.l());
+        } else if (attributeValue.s() != null) {
+            return JsonNodeFactory.instance.textNode(attributeValue.s());
+        } else if (attributeValue.bool() != null) {
+            return JsonNodeFactory.instance.booleanNode(attributeValue.bool());
+        } else if (attributeValue.n() != null) {
+            try {
+                Number n = NumberFormat.getInstance().parse(attributeValue.n());
+                return fromAttributeValue(n);
+            } catch (ParseException e) {
+                throw new IllegalStateException("Invalid number: " + attributeValue.n());
+            }
+        } else if (attributeValue.nul()) { //holds a null value
+            return JsonNodeFactory.instance.nullNode();
+        }
+
+        throw new IllegalStateException("Unexpected attribute value type : " + attributeValue);
+    }
+
+    private static JsonNode rawJsonToJsonNode(String json, ObjectMapper objectMapper) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (IOException e) {
+            throw new IllegalStateException("Invalid Json Provided");
+        }
     }
 
     private static AttributeValue toAttributeValue(ObjectNode objectNode) {
@@ -63,30 +133,6 @@ public final class JsonAttributeValueUtil {
 
     private static AttributeValue toAttributeValue(NumericNode numericNode) {
         return AttributeValue.builder().n(numericNode.asText()).build();
-    }
-
-    public static JsonNode fromAttributeValue(AttributeValue attributeValue) {
-        if (attributeValue.hasM()) {
-            return fromAttributeValue(attributeValue.m());
-        } else if (attributeValue.hasL()) {
-            return fromAttributeValue(attributeValue.l());
-        } else if (attributeValue.s() != null) {
-            return JsonNodeFactory.instance.textNode(attributeValue.s());
-        } else if (attributeValue.bool() != null) {
-            return JsonNodeFactory.instance.booleanNode(attributeValue.bool());
-        } else if (attributeValue.n() != null) {
-            try {
-                Number n = NumberFormat.getInstance().parse(attributeValue.n());
-                return fromAttributeValue(n);
-            } catch (ParseException e) {
-                throw new IllegalStateException("Invalid number: " + attributeValue.n());
-            }
-        } else if (attributeValue.nul()) { //holds a null value
-            return JsonNodeFactory.instance.nullNode();
-        }
-
-        throw new IllegalStateException("Unexpected attribute value type : " + attributeValue);
-
     }
 
     private static JsonNode fromAttributeValue(Map<String, AttributeValue> map) {
