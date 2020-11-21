@@ -41,6 +41,9 @@ class JsonAttributeValueHelperTest {
         JSONAssert.assertEquals(json,
                 objectMapper.writeValueAsString(JsonAttributeValueUtil.fromAttributeValue(attributeValue)),
                 true);
+
+        AttributeValue attributeValueViaRawJson = JsonAttributeValueUtil.toAttributeValue(json, objectMapper);
+        assertThat(attributeValueViaRawJson).isEqualTo(attributeValue);
     }
 
     @Test
