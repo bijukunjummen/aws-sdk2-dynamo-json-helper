@@ -27,10 +27,3 @@ jobs:
     - name: Build with Gradle
       run: |
         ./gradlew check -Pbintray_user=dummy -Pbintray_api_key=dummy
-    - name: Release artifact
-      if: ${{ github.event_name == 'push' }}
-      env:
-        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-        BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-      run: |
-        ./gradlew final -Pbintray_user="$BINTRAY_USER" -Pbintray_api_key="$BINTRAY_API_KEY"
