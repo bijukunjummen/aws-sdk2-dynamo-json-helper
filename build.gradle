@@ -19,29 +19,27 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
 ext {
-    jacksonBom = "2.9.10.20191020"
+    jacksonBom = "2.11.3"
     junitVersion = "5.3.2"
     assertJVersion = "3.16.1"
     testContainersVersion = "1.15.0"
     jsonAssertVersion = "1.5.0"
+    awsSdkVersion = "2.15.25"
 }
 repositories {
     jcenter()
 }
 
 dependencies {
-    implementation enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonBom}")
-    implementation enforcedPlatform("software.amazon.awssdk:bom:2.15.25")
-    api("com.fasterxml.jackson.core:jackson-core")
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("software.amazon.awssdk:dynamodb")
+    api("com.fasterxml.jackson.core:jackson-core:${jacksonBom}")
+    api("com.fasterxml.jackson.core:jackson-databind:${jacksonBom}")
+    api("software.amazon.awssdk:dynamodb:${awsSdkVersion}")
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
     testImplementation("org.testcontainers:localstack:${testContainersVersion}")
     testImplementation("org.skyscreamer:jsonassert:${jsonAssertVersion}")
-
 }
 
 test {
