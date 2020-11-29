@@ -94,6 +94,19 @@ public final class JsonAttributeValueUtil {
         throw new IllegalStateException("Unexpected attribute value type : " + attributeValue);
     }
 
+    /**
+     * Convert a map of {@link AttributeValue} to a {@link JsonNode}
+     *
+     * @param map of names to {@link AttributeValue}
+     * @return Json represented as a Jackson {@link JsonNode}
+     * @throws IllegalStateException if a json type does not map to an {@link AttributeValue}
+     */
+    public static JsonNode fromAttributeValue(Map<String, AttributeValue> map) {
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        map.entrySet().forEach(entry -> objectNode.set(entry.getKey(), fromAttributeValue(entry.getValue())));
+        return objectNode;
+    }
+
     private static JsonNode rawJsonToJsonNode(String json, ObjectMapper objectMapper) {
         try {
             return objectMapper.readTree(json);
@@ -133,12 +146,6 @@ public final class JsonAttributeValueUtil {
 
     private static AttributeValue toAttributeValue(NumericNode numericNode) {
         return AttributeValue.builder().n(numericNode.asText()).build();
-    }
-
-    private static JsonNode fromAttributeValue(Map<String, AttributeValue> map) {
-        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-        map.entrySet().forEach(entry -> objectNode.set(entry.getKey(), fromAttributeValue(entry.getValue())));
-        return objectNode;
     }
 
     private static JsonNode fromAttributeValue(List<AttributeValue> list) {
