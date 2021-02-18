@@ -8,7 +8,6 @@ buildscript {
 
 plugins {
     id 'java-library'
-    id "com.jfrog.bintray" version "1.8.5"
     id 'maven-publish'
     id 'maven'
     id 'nebula.release' version '15.2.0'
@@ -60,59 +59,43 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-bintray {
-    user = bintray_user
-    key = bintray_api_key
-    configurations = ['archives']
-    pkg {
-        repo = 'repo'
-        name = project.name
-        group = project.group
-//        version = project.version
-        userOrg = user
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
-    }
-}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
             }
-            pom {
-                name = 'aws-sdk2-dynamo-json-helper'
-                description = 'Utility for converting a JSON to AWS SDK2 AttributeValue and back'
-                url = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
-                inceptionYear = '2020'
 
-                packaging = 'jar'
-                groupId = project.group
-                artifactId = project.name
-                version = project.version
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description 'Utility for converting a JSON to AWS SDK2 AttributeValue and back'
+                url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+
+                scm {
+                    connection 'scm:git:https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
+                    developerConnection 'scm:git:https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
+                    url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
+                }
 
                 licenses {
                     license {
-                        name = 'The Apache Software License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution = 'repo'
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
-                scm {
-                    connection = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
-                    url = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
 
-                }
                 developers {
                     developer {
-                        name = 'Biju Kunjummen'
-                        id = 'bijukunjummen'
+                        id 'bijukunjummen'
+                        name 'Biju Kunjummen'
+                        email 'biju.kunjummen@gmail.com'
                     }
                 }
             }
