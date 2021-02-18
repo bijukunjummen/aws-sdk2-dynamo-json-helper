@@ -10,6 +10,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'maven'
+    id 'signing'
     id 'nebula.release' version '15.2.0'
 }
 
