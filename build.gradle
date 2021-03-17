@@ -27,7 +27,7 @@ ext {
     awsSdkVersion = "2.15.25"
 }
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
