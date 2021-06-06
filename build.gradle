@@ -9,9 +9,9 @@ buildscript {
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'maven'
     id 'signing'
     id 'nebula.release' version '15.2.0'
+    id "com.github.spotbugs" version "4.6.0"
 }
 
 group = 'com.github.bijukunjummen'
@@ -46,76 +46,79 @@ test {
     useJUnitPlatform()
 }
 
-task javadocJar(type: Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
+ext.isReleaseVersion = !version.toString().endsWith("-SNAPSHOT")
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
+tasks.withType(Sign) {
+    onlyIf { isReleaseVersion }
 }
 
 tasks.snapshot {
-    finalizedBy tasks.uploadArchives
+    finalizedBy tasks.publish
 }
 
 tasks.candidate {
-    finalizedBy tasks.uploadArchives
+    finalizedBy tasks.publish
 }
 
 tasks.final {
-    finalizedBy tasks.uploadArchives
+    finalizedBy tasks.publish
 }
 
-uploadArchives {
+publishing {
     repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        maven {
+            def snapshotUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releaseUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+            url = isReleaseVersion ? releaseUrl : snapshotUrl
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
             }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = project.name
+                description = 'Utility for converting a JSON to AWS SDK2 AttributeValue and back'
+                url = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+                inceptionYear = '2021'
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description 'Utility for converting a JSON to AWS SDK2 AttributeValue and back'
-                url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
-
-                scm {
-                    connection 'scm:git:https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
-                    developerConnection 'scm:git:https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
-                    url 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper'
-                }
+                packaging = 'jar'
+                groupId = project.group
+                artifactId = project.name
+                version = project.version
 
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
                     }
                 }
+                scm {
+                    connection = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
+                    url = 'https://github.com/bijukunjummen/aws-sdk2-dynamo-json-helper.git'
 
+                }
                 developers {
                     developer {
-                        id 'bijukunjummen'
-                        name 'Biju Kunjummen'
-                        email 'biju.kunjummen@gmail.com'
+                        name = 'Biju Kunjummen'
+                        id = 'bijukunjummen'
                     }
                 }
             }
         }
     }
+}
+
+
+signing {
+    sign publishing.publications.mavenJava
 }
