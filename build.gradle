@@ -22,7 +22,7 @@ ext {
     jacksonBom = "2.11.3"
     junitVersion = "5.3.2"
     assertJVersion = "3.16.1"
-    testContainersVersion = "1.15.0"
+    testContainersVersion = "1.15.3"
     jsonAssertVersion = "1.5.0"
     awsSdkVersion = "2.15.25"
 }
@@ -117,7 +117,6 @@ publishing {
         }
     }
 }
-
 
 signing {
     sign publishing.publications.mavenJava

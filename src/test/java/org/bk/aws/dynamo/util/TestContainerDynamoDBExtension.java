@@ -25,7 +25,7 @@ import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
  */
 public final class TestContainerDynamoDBExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private static final String LOCAL_DYNAMODB_IMAGE_NAME = "amazon/dynamodb-local:1.13.4";
+    private static final String LOCAL_DYNAMODB_IMAGE_NAME = "amazon/dynamodb-local:1.16.0";
     private static final int EXPOSED_PORT = 8000;
 
     private GenericContainer server;

@@ -22,17 +22,16 @@ import java.util.Map;
  * and back
  * <p>
  * Uses: It is possible to store a raw string into DynamoDB but then all the advantages of a document store is lost
+ *
  * Every processing on that data will have to be done in the application layer by de-serializing the raw string to a
  * json.
+ * </p>
  * Storing the json as a nested AttributeValue provides a way for the data to become queryable, nested attributes can be
  * queried, filtered and treated like any other attribute in dynamo.
  */
 public final class JsonAttributeValueUtil {
-
     private JsonAttributeValueUtil() {
-
     }
-
 
     /**
      * Convert a {@link JsonNode} to an {@link AttributeValue}

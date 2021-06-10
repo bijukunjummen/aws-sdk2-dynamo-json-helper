@@ -48,7 +48,6 @@ class JsonAttributeValueHelperTest {
 
     @Test
     void convertRootList() throws Exception {
-        //language=JSON
         String json = "[\n" +
                 "  \"a\",\n" +
                 "  \"b\",\n" +
