@@ -34,7 +34,6 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-core:${jacksonBom}")
     api("com.fasterxml.jackson.core:jackson-databind:${jacksonBom}")
     api("software.amazon.awssdk:dynamodb:${awsSdkVersion}")
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
