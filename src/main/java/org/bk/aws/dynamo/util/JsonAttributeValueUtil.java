@@ -2,11 +2,16 @@ package org.bk.aws.dynamo.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.*;
-import org.apache.commons.lang3.math.NumberUtils;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.NumericNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,8 +80,12 @@ public final class JsonAttributeValueUtil {
         } else if (attributeValue.bool() != null) {
             return JsonNodeFactory.instance.booleanNode(attributeValue.bool());
         } else if (attributeValue.n() != null) {
-                Number number = NumberUtils.createNumber(attributeValue.n());
-                return fromAttributeValue(number);
+            try {
+                Number n = NumberFormat.getInstance().parse(attributeValue.n());
+                return fromAttributeValue(n);
+            } catch (ParseException e) {
+                throw new IllegalStateException("Invalid number: " + attributeValue.n());
+            }
         } else if (attributeValue.nul()) { //holds a null value
             return JsonNodeFactory.instance.nullNode();
         }
