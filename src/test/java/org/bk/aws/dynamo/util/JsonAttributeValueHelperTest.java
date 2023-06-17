@@ -86,7 +86,8 @@ class JsonAttributeValueHelperTest {
                 "  \"key1\": 15,\n" +
                 "  \"key2\": 1.345,\n" +
                 "  \"key3\": true,\n" +
-                "  \"key5\": null\n" +
+                "  \"key5\": null\n," +
+                "  \"key6\": -0.5000\n" +
                 "}";
 
         JsonNode jsonNode = objectMapper.readTree(json);
